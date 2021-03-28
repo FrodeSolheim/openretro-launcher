@@ -1,38 +1,37 @@
-from fsgamesys.product import Product
-from fscore.system import System
+import hashlib
 import logging
 import logging.config
+import os
+import shutil
 import sys
+import tarfile
+import tempfile
 import time
+from configparser import ConfigParser
 from typing import Optional
-from fsbc.util import Version
-from launcher.system.prefs.update import UpdatePrefs
-from launcher.system.special.logout import AsyncTaskRunner, Task
 
+import requests
 from autologging import TRACE, traced
 
-import hashlib
 import fsui
-from launcher.experimental.flexbox.button import Button
-from launcher.experimental.flexbox.flexcontainer import (
+from fsbc.util import Version
+from fscore.system import System
+from fsgamesys.product import Product
+from launcher.fswidgets2.button import Button
+from launcher.fswidgets2.flexcontainer import (
     FlexContainer,
     VerticalFlexContainer,
 )
-from launcher.experimental.flexbox.imageview import ImageView
-from launcher.experimental.flexbox.label import Label
-from launcher.experimental.flexbox.window import Window
+from launcher.fswidgets2.imageview import ImageView
+from launcher.fswidgets2.label import Label
+from launcher.fswidgets2.spacer import Spacer
 from launcher.fswidgets2.textarea import TextArea
+from launcher.fswidgets2.window import Window
 from launcher.i18n import gettext
 from launcher.system.classes.windowcache import WindowCache
+from launcher.system.prefs.update import UpdatePrefs
 from launcher.system.special.login import WidgetSizeSpinner
-import logging
-import tempfile
-import requests
-import shutil
-import os
-import tarfile
-from launcher.experimental.flexbox.spacer import Spacer
-from configparser import ConfigParser
+from launcher.system.special.logout import AsyncTaskRunner, Task
 
 log = logging.getLogger(__name__)
 
@@ -42,44 +41,44 @@ log = logging.getLogger(__name__)
 #     format="%(levelname)s:%(name)s:%(funcName)s:%(message)s",
 # )
 
-logging.config.dictConfig(
-    {
-        "version": 1,
-        "formatters": {
-            "logformatter": {
-                # "format": "%(asctime)s:%(levelname)s:%(name)s:%(funcName)s:%(message)s",
-                # "format": "%(name)s:%(funcName)s:%(message)s",
-                "format": "%(message)s",
-            },
-            "traceformatter": {
-                # "format": "%(asctime)s:%(process)s:%(levelname)s:%(filename)s:"
-                # "%(lineno)s:%(name)s:%(funcName)s:%(message)s",
-                "format": "%(name)s:%(funcName)s:%(message)s",
-            },
-        },
-        "handlers": {
-            "loghandler": {
-                "class": "logging.FileHandler",
-                "level": logging.DEBUG,
-                "formatter": "logformatter",
-                "filename": "app.log",
-            },
-            "tracehandler": {
-                "class": "logging.StreamHandler",
-                "level": TRACE,
-                "formatter": "traceformatter",
-                "stream": sys.stdout,
-                # "filename": "trace.log",
-            },
-        },
-        "loggers": {
-            "launcher.system": {
-                "level": TRACE,
-                "handlers": ["tracehandler", "loghandler"],
-            },
-        },
-    }
-)
+# 'logging.config.dictConfig(
+#     {
+#         "version": 1,
+#         "formatters": {
+#             "logformatter": {
+#                 # "format": "%(asctime)s:%(levelname)s:%(name)s:%(funcName)s:%(message)s",
+#                 # "format": "%(name)s:%(funcName)s:%(message)s",
+#                 "format": "%(message)s",
+#             },
+#             "traceformatter": {
+#                 # "format": "%(asctime)s:%(process)s:%(levelname)s:%(filename)s:"
+#                 # "%(lineno)s:%(name)s:%(funcName)s:%(message)s",
+#                 "format": "%(name)s:%(funcName)s:%(message)s",
+#             },
+#         },
+#         "handlers": {
+#             "loghandler": {
+#                 "class": "logging.FileHandler",
+#                 "level": logging.DEBUG,
+#                 "formatter": "logformatter",
+#                 "filename": "app.log",
+#             },
+#             "tracehandler": {
+#                 "class": "logging.StreamHandler",
+#                 "level": TRACE,
+#                 "formatter": "traceformatter",
+#                 "stream": sys.stdout,
+#                 # "filename": "trace.log",
+#             },
+#         },
+#         "loggers": {
+#             "launcher.system": {
+#                 "level": TRACE,
+#                 "handlers": ["tracehandler", "loghandler"],
+#             },
+#         },
+#     }
+# )'
 
 
 @traced
@@ -329,7 +328,15 @@ def findUpdates(availableUpdates):
         return System.getOperatingSystem()
 
     def getInstalledVersion(packageName) -> Optional[str]:
-        # return "1.0.0"
+        if packageName == Product.getLauncherPluginName():
+            if fsboot.development():
+                # We don't want the fake version number to confuse the
+                # updater in development mode.
+                pass
+            else:
+                from launcher.version import VERSION
+
+                return VERSION
         return Updater.getPluginVersion(packageName)
 
     def checkSystemRequirement(version, value):
@@ -431,21 +438,27 @@ class CheckForUpdatesTask(Task):
                             "systems": ["Linux_x86-64"],
                             "version": "4.0.53-dev",
                             "url": "https://github.com/FrodeSolheim/fs-uae-launcher/releases/download/v4.0.53-dev/FS-UAE-Launcher_4.0.53-dev_Linux_x86-64.tar.xz",
-                            "checksums": {"sha256": "0d88d9d622370c1dbf86aa0886d71df9c1a92b5ee9990dfe3ec0fd338c652890"},
+                            "checksums": {
+                                "sha256": "0d88d9d622370c1dbf86aa0886d71df9c1a92b5ee9990dfe3ec0fd338c652890"
+                            },
                         },
                         {
                             "branches": ["Master", "Stable", "Dev"],
                             "systems": ["macOS_x86-64"],
                             "version": "4.0.53-dev",
                             "url": "https://github.com/FrodeSolheim/fs-uae-launcher/releases/download/v4.0.53-dev/FS-UAE-Launcher_4.0.53-dev_Linux_x86-64.tar.xz",
-                            "checksums": {"sha256": "b636b370f2964028534a376c06b6c765cc8bb55a3607495c9a6adcb6276a4cd0"},
+                            "checksums": {
+                                "sha256": "b636b370f2964028534a376c06b6c765cc8bb55a3607495c9a6adcb6276a4cd0"
+                            },
                         },
                         {
                             "branches": ["Master", "Stable", "Dev"],
                             "systems": ["Windows_x86-64"],
                             "version": "4.0.53-dev",
                             "url": "https://github.com/FrodeSolheim/fs-uae-launcher/releases/download/v4.0.53-dev/FS-UAE-Launcher_4.0.53-dev_macOS_x86-64.tar.xz",
-                            "checksums": {"sha256": "9c792fdae2169fd7176d940e866bf19f64e96467934b47c9c04187614548512d"},
+                            "checksums": {
+                                "sha256": "9c792fdae2169fd7176d940e866bf19f64e96467934b47c9c04187614548512d"
+                            },
                         },
                     ]
                 },
@@ -625,14 +638,18 @@ class UpdateTask(Task):
         return packageName == Product.getLauncherPluginName()
 
     def installUpdate(self, packageName):
-        """Downloads and extracts package into `PackageName.next` directory"""
+        """Installs package from `PackageName.next` to `PackageName`"""
         if self.isLauncherUpdate(packageName):
-            log.info(f"Launcher update is not installed now (restart)")
-            self.setProgress(f"Launcher update is postponed for restart")
-            return False
+            if System.isWindows() or True:
+                return self.installUpdateWindows(packageName)
+
+        # if self.isLauncherUpdate(packageName):
+        #     log.info("Launcher update is not installed now (restart)")
+        #     self.setProgress("Launcher update is postponed for restart")
+        #     return False
         self.setProgress(f"Installing update for {packageName}")
-        nextDir = self.getPackageNextDirectory(packageName)
         packageDir = self.getPackageDirectory(packageName)
+        nextDir = self.getPackageNextDirectory(packageName)
         if os.path.exists(packageDir):
             oldDir = f"{packageDir}.old"
             if not os.path.exists(oldDir):
@@ -647,7 +664,7 @@ class UpdateTask(Task):
                     break
                 # log.info("Removing directory {oldDir}")
                 # shutil.rmtree(oldDir)
-            log.info("Renaming directory {packageDir} -> {oldPackageDir}")
+            log.info(f"Renaming directory {packageDir} -> {oldPackageDir}")
             # FIXME: Try catch on this, if failing, tell user to restart the
             # Launcher instead?
             try:
@@ -663,7 +680,115 @@ class UpdateTask(Task):
             try:
                 shutil.rmtree(oldDir)
             except Exception:
-                log.exception("Failed to completely clean up {oldDir}")
-        log.info("Renaming directory {nextDir} -> {packageDir}")
+                log.exception(f"Failed to completely clean up {oldDir}")
+        log.info(f"Renaming directory {nextDir} -> {packageDir}")
         os.rename(nextDir, packageDir)
         return False
+
+    def installUpdateWindows(self, packageName):
+        self.setProgress(f"Installing update for {packageName}....")
+        try:
+            self.installUpdateWindows2(packageName)
+        except Exception as e:
+            self.setProgress(
+                f"WARNING: A failure occurred during installation of "
+                f"{packageName} and it may now be in an inconsistent state."
+            )
+            self.setProgress(
+                f"You should download and re-install {packageName} manually!"
+            )
+            self.setProgress(
+                "FIXME: Write about .next directory and manually moving it "
+                "into place. Also suggest to open Explorer for the user?"
+            )
+            raise e
+
+    def installUpdateWindows2(self, packageName):
+        srcDir = self.getPackageNextDirectory(packageName)
+        dstDir = self.getPackageDirectory(packageName)
+        dstFileList = self.createFileList(dstDir)
+
+        for dirPath, dirNames, fileNames in os.walk(srcDir):
+            relativeDirPath = dirPath[len(srcDir) + 1 :]
+            # print("relative", relativeDirPath)
+            for dirName in dirNames:
+                dstPath = os.path.join(dstDir, relativeDirPath, dirName)
+                print(f"Ensuring directory {dstPath}")
+                if not os.path.exists(dstPath):
+                    os.makedirs(dstPath)
+                try:
+                    dstFileList.remove(os.path.normcase(dstPath))
+                except ValueError:
+                    pass
+            for fileName in fileNames:
+                srcPath = os.path.join(srcDir, relativeDirPath, fileName)
+                dstPath = os.path.join(dstDir, relativeDirPath, fileName)
+                # path = os.path.normpath(os.path.join(dirPath, fileName))
+                # fileList.add(f"path/")
+                # fileList.append(path)
+                if os.path.exists(dstPath):
+                    self.removeOrRename(dstPath)
+                print(f"Copying -> {dstPath}")
+                shutil.copy(srcPath, dstPath)
+                try:
+                    dstFileList.remove(os.path.normcase(dstPath))
+                except ValueError:
+                    pass
+
+        print("Remaining entries", dstFileList)
+        for path in reversed(dstFileList):
+            print(f"File/dir is remaining: {path}")
+            if os.path.isfile(path):
+                try:
+                    self.removeOrRename(path)
+                except IOError:
+                    print(f"Failed to delete remaining file {path}")
+                    # FIXME: Register for future deletion?
+            if os.path.isdir(path):
+                try:
+                    print(f"Removing directory {path}")
+                    os.rmdir(path)
+                except IOError:
+                    print(f"Failed to delete remaining directory {path}")
+                    # FIXME: Register for future deletion?
+
+        # Finally, if successful, rename source directory
+        self.setProgress(f"Cleaning up...")
+        print(f"Deleting directory {srcDir} recursively...")
+        shutil.rmtree(srcDir)
+
+    def removeOrRename(self, path):
+        try:
+            print(f"Trying to remove file {path}")
+            os.remove(path)
+        except IOError:
+            print(f"Could not remove file {path}")
+            # If this does not work, an exception will be thrown
+            print(f"Trying to rename file {path}")
+            newPath = f"{path}.__del__"
+            k = 1
+            while os.path.exists(newPath):
+                k += 1
+                newPath = f"{path}.{k}.__del__"
+            os.rename(path, newPath)
+
+    def createFileList(self, dir):
+        # fileList = set()
+        # We use a list here to keep the order. When we delete remaining
+        # entries, we want to delete in reverse order so parent directories
+        # are deleted at the end.
+        fileList = []
+        for dirPath, dirNames, fileNames in os.walk(dir):
+            for dirName in dirNames:
+                path = os.path.normcase(
+                    os.path.normpath(os.path.join(dirPath, dirName))
+                )
+                # fileList.add(path)
+                fileList.append(path)
+            for fileName in fileNames:
+                path = os.path.normcase(
+                    os.path.normpath(os.path.join(dirPath, fileName))
+                )
+                # fileList.add(path)
+                fileList.append(path)
+        return fileList
