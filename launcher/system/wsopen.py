@@ -9,7 +9,7 @@ from launcher.system.prefs.advancedprefswindow import AdvancedPrefsWindow
 # from launcher.system.prefs.appearanceprefswindow import AppearancePrefsWindow
 from launcher.system.prefs.arcadeprefswindow import ArcadePrefsWindow
 from launcher.system.prefs.controllerprefswindow import ControllerPrefsWindow
-from launcher.system.prefs.directoryprefswindow import DirectoryPrefsWindow
+# from launcher.system.prefs.directoryprefswindow import DirectoryPrefsWindow
 from launcher.system.prefs.filedatabaseprefswindow import (
     FileDatabasePrefsWindow,
 )
@@ -186,7 +186,7 @@ def wsopen_prefs_window(name, *, window=None, parent=None):
         # SYSTEM_PREFS_PRIVACY: PrivacyPrefsWindow,
         SYSTEM_PREFS_SCREENMODE: ScreenModePrefsWindow,
         SYSTEM_PREFS_SOUND: SoundPrefsWindow,
-        SYSTEM_PREFS_STORAGE: DirectoryPrefsWindow,
+        # SYSTEM_PREFS_STORAGE: DirectoryPrefsWindow,
         SYSTEM_PREFS_VIDEO: VideoPrefsWindow,
         SYSTEM_PREFS_WHDLOAD: WHDLoadPrefsWindow,
         SYSTEM_PREFS_WORKSPACE: WorkspacePrefsWindow,
