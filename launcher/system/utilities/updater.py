@@ -14,8 +14,8 @@ import requests
 from autologging import TRACE, traced
 
 import fsui
-from fscore.version import Version
 from fscore.system import System
+from fscore.version import Version
 from fsgamesys.product import Product
 from launcher.fswidgets2.button import Button
 from launcher.fswidgets2.flexcontainer import (
@@ -29,7 +29,7 @@ from launcher.fswidgets2.textarea import TextArea
 from launcher.fswidgets2.window import Window
 from launcher.i18n import gettext
 from launcher.system.classes.windowcache import WindowCache
-from launcher.system.prefs.update import UpdatePrefs
+from launcher.system.prefs.update import Update
 from launcher.system.special.login import WidgetSizeSpinner
 from launcher.system.special.logout import AsyncTaskRunner, Task
 
@@ -185,7 +185,7 @@ class UpdaterWindow(Window):
         # self.textArea.appendText("Hopsann")
 
     def onPreferences(self):
-        UpdatePrefs.open(openedFrom=self.getWindow())
+        Update.open(openedFrom=self.getWindow())
 
     def appendLogLine(self, line):
         self.textArea.appendLine(line)

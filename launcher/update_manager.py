@@ -5,8 +5,8 @@ import requests
 
 from fsbc.application import Application
 from fsbc.util import unused
-from fscore.version import Version
 from fscore.system import System
+from fscore.version import Version
 from fstd.desktop import open_url_in_browser
 from launcher.launcher_settings import LauncherSettings
 from launcher.launcher_signal import LauncherSignal

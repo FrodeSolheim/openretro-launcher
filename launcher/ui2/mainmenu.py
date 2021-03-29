@@ -87,11 +87,9 @@ class MainMenu(PopupMenu):
 
         # Utilities
 
-
         # if Product.is_fs_uae():
         #     self.add_item(gettext("Tools"), self.__on_tools)
         #     # self.add_item(gettext("Utilities"), self.__on_utilities)
-
 
         self.add_separator()
         self.add_item(gettext("Preferences"), self.__on_preferences)
