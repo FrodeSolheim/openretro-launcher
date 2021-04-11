@@ -6,4 +6,4 @@ init()
 
 from launcher.main import main
 
-main(app="openretro-launcher")
+main(app="Launcher", brand="FS-UAE")
