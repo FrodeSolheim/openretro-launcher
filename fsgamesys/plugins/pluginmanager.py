@@ -253,15 +253,20 @@ class PluginManager:
         plugins_dir = FSGSDirectories.get_plugins_dir()
         result.append(plugins_dir)
 
-        # $BASE/Plugins/
-        plugins_dir = os.path.join(FSGSDirectories.get_base_dir(), "Plugins")
+        # $BASE/System/
+        plugins_dir = os.path.join(FSGSDirectories.get_base_dir(), "System")
         if plugins_dir not in result:
             result.append(plugins_dir)
 
+        # $BASE/Plugins/
+        # plugins_dir = os.path.join(FSGSDirectories.get_base_dir(), "Plugins")
+        # if plugins_dir not in result:
+        #     result.append(plugins_dir)
+
         # $BASE/Data/Plugins/
-        plugins_dir = os.path.join(FSGSDirectories.get_data_dir(), "Plugins")
-        if plugins_dir not in result:
-            result.append(plugins_dir)
+        # plugins_dir = os.path.join(FSGSDirectories.get_data_dir(), "Plugins")
+        # if plugins_dir not in result:
+        #     result.append(plugins_dir)
 
         # # $BASE/Workspace/Expansion/
         # plugins_dir = os.path.join(

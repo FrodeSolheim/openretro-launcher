@@ -11,7 +11,7 @@ from configparser import ConfigParser
 from typing import Optional
 
 import requests
-from autologging import TRACE, traced
+# from autologging import TRACE, traced
 
 import fsui
 from fscore.system import System
@@ -81,12 +81,12 @@ log = logging.getLogger(__name__)
 # )'
 
 
-@traced
+# @traced
 def wsopen(window=None, **kwargs):
     return Updater.open(window, **kwargs)
 
 
-@traced
+# @traced
 class Updater:
     @staticmethod
     def open(window: Window = None, **kwargs):
@@ -120,7 +120,7 @@ class Updater:
         return configParser.get("plugin", "version")
 
 
-@traced
+# @traced
 class UpdaterWindow(Window):
     def __init__(self):
         super().__init__(
@@ -211,7 +211,7 @@ class UpdaterWindow(Window):
     def checkForUpdates(self):
         self.setRunning(True)
 
-        @traced
+        # @traced
         def onResult(result):
             self.checkForUpdatesButton.enable()
 
@@ -248,14 +248,14 @@ class UpdaterWindow(Window):
             # if self.updateAllButton.isEnabled():
             #     self.updateAll()
 
-        @traced
+        # @traced
         def onError(error):
             self.checkForUpdatesButton.enable()
             # self.setRunning(False)
             self.appendLogLine(f"Error: {str(error)}")
             # self.errorLabel.setText(f"Error: {str(error)}")
 
-        @traced
+        # @traced
         def onProgress(progress, *, task):
             # self.errorLabel.setText(progress)
             self.appendLogLine(progress)
@@ -276,7 +276,7 @@ class UpdaterWindow(Window):
             return
         self.setRunning(True)
 
-        @traced
+        # @traced
         def onResult(result):
             self.checkForUpdatesButton.enable()
             if result["restartRequired"]:
@@ -286,14 +286,14 @@ class UpdaterWindow(Window):
             else:
                 self.appendLogLine("Update complete")
 
-        @traced
+        # @traced
         def onError(error):
             self.checkForUpdatesButton.enable()
             # self.setRunning(False)
             self.appendLogLine(f"Error: {str(error)}")
             # self.errorLabel.setText(f"Error: {str(error)}")
 
-        @traced
+        # @traced
         def onProgress(progress, *, task):
             # self.errorLabel.setText(progress)
             self.appendLogLine(progress)
@@ -306,7 +306,7 @@ class UpdaterWindow(Window):
         )
 
 
-@traced
+# @traced
 def findUpdates(availableUpdates):
     log.debug("Checking packages updates")
 
@@ -500,7 +500,7 @@ class CheckForUpdatesTask(Task):
 import fsboot
 
 
-@traced
+# @traced
 class UpdateTask(Task):
     def __init__(self, updates):
         super().__init__()

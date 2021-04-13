@@ -1,6 +1,6 @@
 from typing import Literal, Tuple
 
-from autologging import traced
+# from autologging import traced
 
 from fsui.common.layout import Layout
 
@@ -10,7 +10,7 @@ BOTTOM = 2
 LEFT = 3
 
 
-@traced
+# @traced
 class FlexLayout(Layout):
     def __init__(self, parent=None):
         self.children = []
