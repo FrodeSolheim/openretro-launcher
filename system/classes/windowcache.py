@@ -1,12 +1,15 @@
 import logging
-from typing import Dict, Optional, Type
-
-# from autologging import traced
+from typing import Any, Dict, Optional, Type, TypeVar
 
 from fsui import Window
 
+# from autologging import traced
+
+
 log = logging.getLogger(__name__)
 
+
+T = TypeVar("T", bound="Window")
 
 # @traced
 class WindowCache:
@@ -15,12 +18,12 @@ class WindowCache:
     @classmethod
     def open(
         cls,
-        window_class: Type[Window],
+        window_class: Type[T],
         cache_key: Optional[str] = None,
         center_on_window: Optional[Window] = None,
         centerOnWindow: Optional[Window] = None,
-        **kwargs
-    ):
+        **kwargs: Dict[str, Any]
+    ) -> T:
         cache_key_str = cache_key or repr(window_class)
         try:
             window = cls.cache[cache_key_str]

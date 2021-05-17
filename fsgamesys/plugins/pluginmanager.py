@@ -5,10 +5,11 @@ import subprocess
 import traceback
 from configparser import ConfigParser, NoSectionError
 from operator import attrgetter
+from typing import Dict, Optional
 
 import fsboot
-from fscore.version import Version
 from fscore.system import System
+from fscore.version import Version
 from fsgamesys.FSGSDirectories import FSGSDirectories
 
 X86_MACHINES = ["x86", "i386", "i486", "i586", "i686"]
@@ -68,7 +69,7 @@ class Plugin(BasePlugin):
         logger.debug("loading provides for %s %s", self.path, self.platform())
         try:
             for key, value in cp.items(self.platform()):
-                self._provides[key] = value
+                self.provides[key] = value
         except NoSectionError:
             pass
 
@@ -211,7 +212,7 @@ class Executable:
         if ld_library_path:
             self.env["LD_LIBRARY_PATH"] = os.path.dirname(self.path)
 
-    def popen(self, args, env=None, **kwargs):
+    def popen(self, args, env: Dict[str, str] = None, **kwargs):
         logger.info("[EXECUTE] %s %s", self.path, repr(args))
         # logger.debug("PluginExecutable.popen %s %s %s",
         #              repr(args), repr(env), repr(kwargs))
@@ -481,7 +482,7 @@ class PluginManager:
             return None
         return plugin.library_path(name)
 
-    def find_file_by_sha1(self, sha1):
+    def find_file_by_sha1(self, sha1: str) -> Optional[str]:
         try:
             plugin = self.provides()["sha1:" + sha1]
         except KeyError:

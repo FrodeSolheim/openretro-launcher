@@ -215,7 +215,13 @@ class MameDriver(GameDriver):
             current_task.set_progress("Preparing ROM {name}".format(name=name))
             input_stream = self.fsgs.file.open(file_uri)
             if input_stream is None:
-                raise Exception("Cannot not find required ROM " + repr(name) + " (" + sha1 + ")")
+                raise Exception(
+                    "Cannot not find required ROM "
+                    + repr(name)
+                    + " ("
+                    + sha1
+                    + ")"
+                )
             path = os.path.join(system_rom_path, name)
             with open(path, "wb") as f:
                 f.write(input_stream.read())

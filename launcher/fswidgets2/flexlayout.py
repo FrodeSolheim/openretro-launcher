@@ -1,8 +1,10 @@
-from typing import Literal, Tuple
+from typing import Literal, Optional, Tuple
+
+from fsui.common.layout import Layout
+from fswidgets.widget import Widget
 
 # from autologging import traced
 
-from fsui.common.layout import Layout
 
 TOP = 0
 RIGHT = 1
@@ -46,7 +48,12 @@ class FlexLayout(Layout):
             ]
             self.gap = parent.style.get("gap", 0)
 
-    def add(self, child, fill=None, expand=None):
+    def add(
+        self,
+        child: Widget,
+        fill: Optional[bool] = None,
+        expand: Optional[bool] = None,
+    ):
         # Inserting at index instead of appending, since we can then use a
         # default insert index for new items, allowing widgets to support
         # adding widgets into the middle of default widgets.

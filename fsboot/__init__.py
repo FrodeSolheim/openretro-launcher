@@ -1,5 +1,6 @@
 import ctypes
 import getpass
+import linecache
 import logging
 import os
 import subprocess
@@ -7,7 +8,6 @@ import sys
 import time
 from functools import lru_cache
 from typing import List
-import linecache
 
 # The original argument list at boot time, before any modifications
 _argv = []  # type: List[str]
@@ -30,7 +30,7 @@ def enableFrozenTokenizeWorkaround():
     Installs a replacement for linecache.updatecache to prevent an issue where
     the tokenizer tries to parse the executable as a Python script when doing
     tracebacks. Fixes errors like "SyntaxError: invalid or missing encoding
-    declaration" and " UnicodeDecodeError: 'utf-8' codec can't decode byte 
+    declaration" and " UnicodeDecodeError: 'utf-8' codec can't decode byte
     0xa6 in position 0: invalid start byte".
     """
     originalUpdateCache = linecache.updatecache

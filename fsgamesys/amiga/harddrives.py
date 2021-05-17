@@ -1,9 +1,9 @@
-import hashlib
 import os
-from typing import Optional
+from os import path
 
 from fsgamesys.amiga.amiga import Amiga
-from fsgamesys.amiga.amigaconfig import AmigaConfig
+
+# from fsgamesys.amiga.amigaconfig import AmigaConfig
 from fsgamesys.amiga.amigaconstants import AmigaConstants
 from fsgamesys.amiga.config import Config
 from fsgamesys.amiga.launchhandler import (
@@ -11,13 +11,15 @@ from fsgamesys.amiga.launchhandler import (
     encode_file_comment,
     system_configuration,
 )
-from fsgamesys.amiga.types import ConfigType, FilesType
+from fsgamesys.amiga.types import ConfigType
 from fsgamesys.amiga.whdload import prepare_whdload_system_volume
 from fsgamesys.amiga.xpkmaster import prepare_xpkmaster_files
+from fsgamesys.files.installablefile import InstallableFile
+from fsgamesys.files.installablefiles import InstallableFiles
 from fsgamesys.network import is_http_url
 
 
-def prepare_amiga_hard_drives(config: ConfigType, files):
+def prepare_amiga_hard_drives(config: ConfigType, files: InstallableFiles):
     for i in range(Amiga.MAX_HARD_DRIVES):
         prepare_amiga_hard_drive(config, i, files)
 
@@ -41,7 +43,9 @@ def maybe_disable_save_states(config: ConfigType):
     Config(config).set_save_states(False)
 
 
-def prepare_amiga_hard_drive(config: ConfigType, drive_index: int, files):
+def prepare_amiga_hard_drive(
+    config: ConfigType, drive_index: int, files: InstallableFiles
+):
     src = Config(config).hard_drive_n(drive_index)
     if not src:
         return
@@ -69,7 +73,11 @@ def prepare_amiga_hard_drive(config: ConfigType, drive_index: int, files):
         raise NotImplementedError()
         maybe_disable_save_states(config)
     else:
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        # dest_dir = "DH0"
+        configKey = "hard_drive_{}".format(drive_index)
+        # if not config.get(configKey, ""):
+        config[configKey] = src
 
         # if ext in Archive.extensions:
         #     print("zipped hard drive", src)
@@ -105,7 +113,7 @@ def prepare_amiga_hard_drive(config: ConfigType, drive_index: int, files):
 #     return file_list
 
 
-def prepare_dh0_files(config: ConfigType, files: FilesType):
+def prepare_dh0_files(config: ConfigType, files: InstallableFiles):
     whdload_args = Config(config).whdload_args()
     hdinst_args = Config(config).hdinst_args()
     hd_startup = Config(config).hdinst_args()
@@ -125,20 +133,20 @@ def prepare_dh0_files(config: ConfigType, files: FilesType):
     s_dir = os.path.join(dest_dir, "S")
     # if not os.path.exists(s_dir):
     #     os.makedirs(s_dir)
-    files[s_dir + "/"] = {}
+    files[s_dir + os.sep] = InstallableFile.fromDirectory()
     libs_dir = os.path.join(dest_dir, "Libs")
     # if not os.path.exists(libs_dir):
     #     os.makedirs(libs_dir)
-    files[libs_dir + "/"] = {}
+    files[libs_dir + os.sep] = InstallableFile.fromDirectory()
 
     devs_dir = os.path.join(dest_dir, "Devs")
     # if not os.path.exists(devs_dir):
     #     os.makedirs(devs_dir)
-    files[devs_dir + "/"] = {}
+    files[devs_dir + os.sep] = InstallableFile.fromDirectory()
     fonts_dir = os.path.join(dest_dir, "Fonts")
     # if not os.path.exists(fonts_dir):
     #     os.makedirs(fonts_dir)
-    files[fonts_dir + "/"] = {}
+    files[fonts_dir + os.sep] = InstallableFile.fromDirectory()
 
     if hd_startup:
         config["hard_drive_0_priority"] = "6"
@@ -152,16 +160,16 @@ def prepare_dh0_files(config: ConfigType, files: FilesType):
         config["__setpatch__"] = "1"
         prepare_setpatch(dest_dir, files)
 
-    workbench_version: Optional[str] = None
-    amiga_model = Config(config).amiga_model()
-    if amiga_model in ["A500+", "A600"]:
-        workbench_version = "2.04"
-    elif amiga_model.startswith("A1200"):
-        workbench_version = "3.0"
-    elif amiga_model.startswith("A4000"):
-        workbench_version = "3.0"
-    # else:
-    #     workbench_version = None
+    # workbenchVersion: Optional[str] = None
+    # amiga_model = Config(config).amiga_model()
+    # if amiga_model in ["A500+", "A600"]:
+    #     workbenchVersion = "2.04"
+    # elif amiga_model.startswith("A1200"):
+    #     workbenchVersion = "3.0"
+    # elif amiga_model.startswith("A4000"):
+    #     workbenchVersion = "3.0"
+    # # else:
+    # #     workbenchVersion = None
 
     # FIXME:
     # if "workbench" in self.hd_requirements:
@@ -205,7 +213,9 @@ def prepare_dh0_files(config: ConfigType, files: FilesType):
     # if not os.path.exists(system_configuration_file):
     #     with open(system_configuration_file, "wb") as f:
     #         f.write(system_configuration)
-    files[system_configuration_file] = {"data": system_configuration}
+    files[system_configuration_file] = InstallableFile.fromData(
+        data=system_configuration
+    )
 
 
 # def copy_setpatch(self, base_dir):
@@ -245,24 +255,23 @@ def prepare_dh0_files(config: ConfigType, files: FilesType):
 # SetPatch file
 
 
-def prepare_setpatch(hd_dir: str, files: FilesType):
+def prepare_setpatch(hd_dir: str, files: InstallableFiles):
     # FIXME: Only optional if not using netplay?
-    files[f"{hd_dir}/C/SetPatch"] = {
-        "sha1": AmigaConstants.SETPATCH_39_6_SHA1,
-        "optional": True,
-    }
+    files[path.join(hd_dir, "C", "SetPatch")] = InstallableFile(
+        sha1=AmigaConstants.SETPATCH_39_6_SHA1, optional=True
+    )
 
 
 def prepare_game_hard_drive(
-    config: ConfigType, drive_index, src, files: FilesType
+    config: ConfigType, drive_index: int, src: str, files: InstallableFiles
 ):
     print("prepare_game_hard_drive", drive_index, src)
 
     if src.startswith("file_list:"):
-        _scheme, dummy, drive = src.split("/")
+        _, _, drive = src.split("/")
         # file_list = config.file_list()
     else:
-        _scheme, dummy, dummy, game_uuid, drive = src.split("/")
+        _, _, _, _, drive = src.split("/")
         # file_list = get_file_list_for_game_uuid(game_uuid)
         # file_list = config.file_list()
         # raise NotImplementedError("hmm")
@@ -297,12 +306,15 @@ def prepare_game_hard_drive(
         # amiga_rel_path = "/".join(amiga_rel_parts)
         amiga_rel_path = amiga_path_to_host_path(name[len(drive_prefix) :])
 
-        dst_file = os.path.join(dir_path, amiga_rel_path)
+        dst_file = path.join(dir_path, amiga_rel_path.replace("/", os.sep))
         print(repr(dst_file))
+        # x-Important to check the original name here and not the normalized path
+        # x-since normalization could have changed / to \ or even remove the
+        # x-trailing slash/backslash.
         # if name.endswith("/"):
-        if dst_file.endswith("/"):
-            # os.makedirs(Paths.str(dst_file))
-            files[dst_file] = {}
+        if dst_file.endswith(os.sep):
+            # os.makedirs(Paths.encode(dst_file))
+            files[dst_file] = InstallableFile.fromDirectory()
             continue
         # if not os.path.exists(os.path.dirname(dst_file)):
         #     os.makedirs(os.path.dirname(dst_file))
@@ -316,10 +328,10 @@ def prepare_game_hard_drive(
         #     "sha1": file_entry["sha1"],
         #     "size": file_entry["size"]
         # })
-        files[dst_file] = {
-            "sha1": file_entry["sha1"],
-            "size": file_entry["size"],
-        }
+        files[dst_file] = InstallableFile(
+            sha1=file_entry["sha1"], size=file_entry["size"]
+        )
+
         # src_file = self.fsgs.file.find_by_sha1(sha1)
         # if not os.path.exists(os.path.dirname(dst_file)):
         #     os.makedirs(os.path.dirname(dst_file))
@@ -345,11 +357,7 @@ def prepare_game_hard_drive(
         # with open(dst_file + ".uaem", "wb") as out_file:
         #     out_file.write("".join(metadata).encode("UTF-8"))
         data = "".join(metadata).encode("UTF-8")
-        files[dst_file + ".uaem"] = {
-            "data": data,
-            "sha1": hashlib.sha1(data).hexdigest(),
-            "size": len(data),
-        }
+        files[dst_file + ".uaem"] = InstallableFile.fromData(data)
 
     Config(config).set_hard_drive_n(
         drive_index, os.path.join(config["run_dir"], dir_path)
