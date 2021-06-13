@@ -18,6 +18,16 @@ jobs:
         shell: msys2 {0}
     steps:
 
+      - uses: msys2/setup-msys2@v2
+        with:
+          install: >-
+            make
+            dos2unix
+            tar
+            zip
+          path-type: inherit
+          update: true
+
       - name: Checkout fs-uae-launcher
         uses: actions/checkout@v2
         with:
@@ -32,16 +42,6 @@ jobs:
         run: |
           cp _project/PACKAGE.FS .
           cp _project/openretro-launcher .
-
-      - uses: msys2/setup-msys2@v2
-        with:
-          install: >-
-            make
-            dos2unix
-            tar
-            zip
-          path-type: inherit
-          update: true
 
       - name: Download Python
         run: |
