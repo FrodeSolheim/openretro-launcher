@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
 
       - name: Reconfigure project
-        run: >-
+        run:
           ls .
           ls ..
           cp _openretro-launcher/PACKAGE.FS .
