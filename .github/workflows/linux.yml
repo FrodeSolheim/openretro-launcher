@@ -15,21 +15,21 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
 
+      - name: Checkout fs-uae-launcher
+        uses: actions/checkout@v2
+        with:
+          repository: FrodeSolheim/fs-uae-launcher
+          fetch-depth: 0
+
       - uses: actions/checkout@v2
         with:
-          path: ../_openretro-launcher
+          path: _openretro-launcher
 
       - name: pwd
         run: pwd
 
       - name: find ..
         run: find ..
-
-      - name: Checkout fs-uae-launcher
-        uses: actions/checkout@v2
-        with:
-          repository: FrodeSolheim/fs-uae-launcher
-          fetch-depth: 0
 
       - name: pwd
         run: pwd
@@ -45,8 +45,8 @@ jobs:
           ls ..
           echo find ..
           find ..
-          cp ../_openretro-launcher/PACKAGE.FS .
-          cp ../_openretro-launcher/openretro-launcher .
+          cp _openretro-launcher/PACKAGE.FS .
+          cp _openretro-launcher/openretro-launcher .
 
       - name: Install deb packages
         run: >-
