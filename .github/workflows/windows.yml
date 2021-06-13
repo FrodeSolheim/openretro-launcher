@@ -2,13 +2,13 @@ name: Windows
 on:
   push:
     branches:
+      - beta
       - master
-      - dev
       - stable
   pull_request:
     branches:
+      - beta
       - master
-      - dev
       - stable
 jobs:
   x86-64:
@@ -18,9 +18,20 @@ jobs:
         shell: msys2 {0}
     steps:
 
+      - name: Checkout fs-uae-launcher
+        uses: actions/checkout@v2
+        with:
+          repository: FrodeSolheim/fs-uae-launcher
+          fetch-depth: 0
+
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          path: _project
+
+      - name: Reconfigure project
+        run: |
+          cp _project/PACKAGE.FS .
+          cp _project/openretro-launcher .
 
       - uses: msys2/setup-msys2@v2
         with:

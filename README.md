@@ -1,5 +1,4 @@
 # OpenRetro Launcher
 
-This is a copy of the fs-uae-launcher repository, with different startup
-scripts. The reason for having a separate repository is for practical
-purposes related to building via GitHub Actions.
+This is a helper repository for building OpenRetro Launcher via GitHub Actions
+from code in the fs-uae-launcher repository.

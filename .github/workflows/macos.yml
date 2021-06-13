@@ -2,26 +2,37 @@ name: macOS
 on:
   push:
     branches:
+      - beta
       - master
-      - dev
       - stable
   pull_request:
     branches:
+      - beta
       - master
-      - dev
       - stable
 jobs:
   x86-64:
     runs-on: macos-10.15
     steps:
 
-      - name: Install brew packages
-        run: |
-          brew install dos2unix
+      - name: Checkout fs-uae-launcher
+        uses: actions/checkout@v2
+        with:
+          repository: FrodeSolheim/fs-uae-launcher
+          fetch-depth: 0
 
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          path: _project
+
+      - name: Reconfigure project
+        run: |
+          cp _project/PACKAGE.FS .
+          cp _project/openretro-launcher .
+
+      - name: Install brew packages
+        run: |
+          brew install dos2unix
 
       - name: Check Python version
         run: |
