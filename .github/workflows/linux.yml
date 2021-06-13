@@ -18,7 +18,7 @@ jobs:
       - 
         uses: actions/checkout@v2
         with:
-          path: _openretro-launcher
+          path: openretro-launcher
 
       - name: Checkout fs-uae-launcher
         uses: actions/checkout@v2
@@ -28,10 +28,12 @@ jobs:
 
       - name: Reconfigure project
         run: |
+          echo ls .
           ls .
+          echo ls ..
           ls ..
-          cp _openretro-launcher/PACKAGE.FS .
-          cp _openretro-launcher/openretro-launcher .
+          cp ../openretro-launcher/PACKAGE.FS .
+          cp ../openretro-launcher/openretro-launcher .
 
       - name: Install deb packages
         run: >-
