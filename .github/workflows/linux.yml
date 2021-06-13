@@ -15,10 +15,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
 
-      - 
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
-          path: openretro-launcher
+          path: _openretro-launcher
 
       - name: Checkout fs-uae-launcher
         uses: actions/checkout@v2
@@ -32,6 +31,8 @@ jobs:
           ls .
           echo ls ..
           ls ..
+          echo find ..
+          find ..
           cp ../openretro-launcher/PACKAGE.FS .
           cp ../openretro-launcher/openretro-launcher .
 
