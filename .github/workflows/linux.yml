@@ -15,15 +15,25 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
 
+      - uses: actions/checkout@v2
+        with:
+          path: _openretro-launcher
+
+      - uses: actions/checkout@v2
+        with:
+          repository: FrodeSolheim/fs-uae-launcher
+          fetch-depth: 0
+
+      - name: Reconfigure project
+        run: >-
+          cp _openretro-launcher/PACKAGE.FS .
+          cp _openretro-launcher/openretro-launcher .
+
       - name: Install deb packages
         run: >-
           sudo apt install
           dos2unix
           gettext
-
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
