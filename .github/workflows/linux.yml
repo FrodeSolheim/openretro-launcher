@@ -19,11 +19,23 @@ jobs:
         with:
           path: sub
 
+      - name: pwd
+        run: pwd
+
+      - name: find ..
+        run: find ..
+
       - name: Checkout fs-uae-launcher
         uses: actions/checkout@v2
         with:
           repository: FrodeSolheim/fs-uae-launcher
           fetch-depth: 0
+
+      - name: pwd
+        run: pwd
+
+      - name: find ..
+        run: find ..
 
       - name: Reconfigure project
         run: |
