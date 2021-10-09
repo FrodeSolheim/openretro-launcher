@@ -20,6 +20,7 @@ jobs:
         with:
           repository: FrodeSolheim/fs-uae-launcher
           fetch-depth: 0
+          ref: 27b72d37a3ce58bf870905a5a628461fef8baabf
 
       - uses: actions/checkout@v2
         with:
