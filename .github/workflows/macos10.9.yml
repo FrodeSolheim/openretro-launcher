@@ -2,13 +2,13 @@ name: macOS10.9
 on:
   push:
     branches:
-      - beta
       - master
+      - beta
       - stable
   pull_request:
     branches:
-      - beta
       - master
+      - beta
       - stable
 jobs:
   x86-64:
